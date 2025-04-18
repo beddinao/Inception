@@ -11,6 +11,11 @@ https://excalidraw.com/#json=qSE4mp02gFfg79sjcFiyA,Wo5G3CjQBAQ-DqGptgbe5w
 ./inception_graph.excalidraw
 ```
 
+<div align="center" width="100%">
+  <img  width="100%" src="./screenshot.png" title="graph" />
+</div>
+
+
 #### The School Subject of the project:
 
 ```
