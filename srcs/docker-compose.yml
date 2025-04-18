@@ -1,0 +1,130 @@
+version: '3'
+
+networks:
+  inception:
+    name: inception
+
+volumes:
+  wordpress-files:
+    name: wordpress-files
+    driver: local
+    driver_opts:
+      device: /home/$LOGIN/data/wordpress-files
+      o: bind
+      type: none
+  database-files:
+    name: database-files
+    driver: local
+    driver_opts:
+      device: /home/$LOGIN/data/database-files
+      o: bind
+      type: none
+  nginx-log:
+    name: nginx-log
+    driver: local
+    driver_opts:
+      device: /home/$LOGIN/data/nginx-log
+      o: bind
+      type: none
+  ssl-certs:
+    name: ssl-certs
+    driver: local
+    driver_opts:
+      device: /home/$LOGIN/data/ssl-certs
+      o: bind
+      type: none
+
+services:
+  nginx:
+    container_name: nginx
+    build: ./requirements/nginx/.
+    ports:
+      - '443:443'
+    volumes:
+      - 'wordpress-files:/var/www/html'
+      - 'nginx-log:/var/log/nginx'
+      - 'ssl-certs:/var/certs'
+    restart: on-failure
+    depends_on:
+      - wordpress
+      - mariadb
+    networks:
+      - inception
+    env_file: .env
+    healthcheck:
+      test: ["CMD-SHELL", "service nginx status || exit 1"]
+  wordpress:
+    container_name: wordpress
+    build: ./requirements/wordpress/.
+    volumes:
+      - 'wordpress-files:/var/www/html/'
+    restart: on-failure
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    networks:
+      - inception
+    env_file: .env
+  mariadb:
+    container_name: mariadb
+    build: ./requirements/mariadb/.
+    restart: on-failure
+    networks:
+      - inception
+    volumes:
+      - 'database-files:/var/sql_data/'
+    env_file: .env
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "--silent"]
+  redis:
+    container_name: redis
+    build: ./requirements/bonus/redis/.
+    restart: on-failure
+    networks:
+      - inception
+    env_file:
+      - .env
+  adminer:
+    container_name: adminer
+    build: ./requirements/bonus/adminer/.
+    env_file:
+      - .env
+    ports:
+      - '1001:1001'
+    restart: on-failure
+    networks:
+      - inception
+    depends_on:
+      - mariadb
+  ftp_server:
+    container_name: ftp_server
+    build: ./requirements/bonus/ftp_server/.
+    env_file:
+      - .env
+    ports:
+      - '1002:21'
+    restart: on-failure
+    networks:
+      - inception
+    depends_on:
+      - wordpress
+    volumes:
+      - 'wordpress-files:/var/www/html'
+  goaccess:
+    container_name: goAccess
+    build: ./requirements/bonus/goaccess/.
+    restart: on-failure
+    env_file:
+      - .env
+    volumes:
+      - wordpress-files:/var/www/html
+      - nginx-log:/var/log/nginx
+      - ssl-certs:/var/certs
+    depends_on:
+      nginx:
+        condition: service_healthy
+    ports:
+      - '7890:7890'
+    networks:
+      - inception
+

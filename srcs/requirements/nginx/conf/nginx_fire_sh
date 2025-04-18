@@ -1,0 +1,10 @@
+#!/bin/bash
+
+if [ ! -f /var/certs/certificate.crt ]; then
+	cp /etc/nginx/certs/certificate.crt /var/certs/
+	cp /etc/nginx/certs/certificate.key /var/certs/
+fi
+
+rm -rf /var/www/html/index.html /var/www/html/dummy
+
+nginx -g 'daemon off;'
