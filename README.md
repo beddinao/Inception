@@ -1,6 +1,6 @@
 # *`Inception`*
 
-####  Graph explaining the stracture of the project:
+####  Graph explaining the structure of the project:
 
 <a href="https://excalidraw.com/#json=qSE4mp02gFfg79sjcFiyA,Wo5G3CjQBAQ-DqGptgbe5w">link</a>
 ```
